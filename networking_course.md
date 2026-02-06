@@ -67,7 +67,17 @@ Historically, IPs were "Classful". Now we use CIDR (Classless Inter-Domain Routi
 | **B** | 128 - 191 | 255.255.0.0 (/16) | Mid-size networks |
 | **C** | 192 - 223 | 255.255.255.0 (/24) | Small networks (Home/Labs) |
 
-| **C** | 192 - 223 | 255.255.255.0 (/24) | Small networks (Home/Labs) |
+#### 1.2.1 The Modern Way: CIDR
+Classful addressing wasted millions of IPs (e.g., getting a Class A gave you 16 million IPs even if you only needed 1,000). **CIDR (Classless Inter-Domain Routing)** solved this by allowing us to cut networks to the exact size we need.
+
+**The Suffix Notation (`/xx`):**
+Instead of saying "Class C", we use a slash followed by the number of bits turned "ON" in the mask.
+*   `/8` = `255.0.0.0` (Old Class A)
+*   `/16` = `255.255.0.0` (Old Class B)
+*   `/24` = `255.255.255.0` (Old Class C)
+*   `/25` = `255.255.255.128` (Half a Class C)
+
+This flexibility is why we can have a `/30` network with only 4 IPs (2 usable).
 
 > **Localhost Loopback:** `127.0.0.1` -> "Me". Traffic never leaves the device.
 
@@ -287,7 +297,7 @@ sequenceDiagram
 1.  Open Wireshark and select your active network interface (WiFi/Ethernet).
 2.  In the filter bar, type: `tcp.port == 80`.
 3.  Start Capture (Blue Shark fin).
-4.  Open a browser and go to `http://example.com` (Use HTTP, not HTTPS for easier initial viewing).
+4.  Curl `http://example.com` (Use HTTP, not HTTPS for easier initial viewing).
 5.  Stop Capture.
 6.  **Analyze:**
     *   Look for the first 3 packets.
@@ -372,15 +382,14 @@ sequenceDiagram
 **How:** We will force the browser/curl to dump the "Session Keys" to a file, and tell Wireshark to read them.
 
 1.  **Set the Key Log Variable:**
-    *   **Windows (Powershell):** `$env:SSLKEYLOGFILE = "C:\Temp\sslkeylog.log"`
-    *   **Mac/Linux:** `export SSLKEYLOGFILE=~/sslkeylog.log`
+    *   **Windows** `SSLKEYLOGFILE = "C:\Temp\sslkeylog.log"`
 2.  **Configure Wireshark:**
     *   Go to **Edit -> Preferences -> Protocols -> TLS**.
     *   In **(Pre)-Master-Secret log filename**, browse and select your `sslkeylog.log` file.
 3.  **Capture & Generate Traffic:**
-    *   Start Capture.
-    *   **Crucial:** Launch your browser or curl *from the same terminal* where you set the variable.
-    *   Run: `curl -v https://example.com`
+    *   Start Capture
+    *   **Crucial:** Launch your browser from within wireshark launch command.
+    *   Run: `https://httpbin.org`
     *   Stop Capture.
 4.  **The Reveal:**
     *   Look at your packet list. You will now see green **HTTP** packets *instead* of just TLS Application Data.
