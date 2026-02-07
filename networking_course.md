@@ -17,6 +17,8 @@ As a developer, you write code that often lives on "Action Island" (your laptop 
 ### 1.1 The Mental Model: OSI vs TCP/IP
 Forget memorizing all 7 OSI layers for now. Focus on the **TCP/IP Model** because that's what we actually use.
 
+![OSI vs TCP/IP Model](osi-layer.png)
+
 ```mermaid
 graph TD
     subgraph "OSI Model (Theoretical)"
@@ -164,6 +166,8 @@ To talk to google.com, you need to leave your LAN. You need a **Router**.
 
 **Routing Decision Logic (The Journey):**
 How does a packet get from **Client C** (Left) to **Server S** (Right) and back?
+
+![Packet Routing Path](osi-path.png)
 
 ```mermaid
 graph LR
