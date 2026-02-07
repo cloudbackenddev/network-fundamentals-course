@@ -69,11 +69,21 @@ Historically, IPs were "Classful". Now we use CIDR (Classless Inter-Domain Routi
 | **B** | 128 - 191 | 255.255.0.0 (/16) | Mid-size networks |
 | **C** | 192 - 223 | 255.255.255.0 (/24) | Small networks (Home/Labs) |
 
-#### 1.2.1 The Modern Way: CIDR
+### 1.3 Subnet Masks: The Boundary
+The mask tells the device: "Which part is Network (Street) vs Host (House)?"
+
+**The Binary View (How it actually works):**
+Computers don't see `255.255.255.0`. They see 1s and 0s.
+*   **IP (`192.168.1.5`):** `11000000.10101000.00000001.00000101`
+*   **Mask (`255.255.255.0`):** `11111111.11111111.11111111.00000000`
+*   **AND Operation:** `11000000.10101000.00000001` . `00000000` (Matches first 24 bits)
+*   **Result:** `192.168.1.0` (Network ID)
+
+### 1.4 CIDR: The Modern Notation
 Classful addressing wasted millions of IPs (e.g., getting a Class A gave you 16 million IPs even if you only needed 1,000). **CIDR (Classless Inter-Domain Routing)** solved this by allowing us to cut networks to the exact size we need.
 
 **The Suffix Notation (`/xx`):**
-Instead of saying "Class C", we use a slash followed by the number of bits turned "ON" in the mask.
+Instead of saying "Class C" or typing out `255.255.255.0`, we use a slash followed by the number of bits turned "ON" in the mask.
 *   `/8` = `255.0.0.0` (Old Class A)
 *   `/16` = `255.255.0.0` (Old Class B)
 *   `/24` = `255.255.255.0` (Old Class C)
@@ -81,6 +91,33 @@ Instead of saying "Class C", we use a slash followed by the number of bits turne
 
 This flexibility is why we can have a `/30` network with only 4 IPs (2 usable).
 
+**Quick CIDR Reference Table:**
+| CIDR | Subnet Mask | Usable Hosts | Notes |
+| :--- | :--- | :--- | :--- |
+| **/24** | 255.255.255.0 | 254 | Standard Home/Office |
+| **/25** | 255.255.255.128 | 126 | Split in half |
+| **/30** | 255.255.255.252 | 2 | Point-to-Point Links (Router-to-Router) |
+
+#### 1.4.1 Subnetting: The Art of "Borrowing Bits"
+**Why do we Subnet? (The Benefits):**
+1.  **Reduce Broadcast Traffic:** If one PC yells (Broadcast), only its subnet hears it. Prevents the whole network from slowing down.
+2.  **Security:** Routers/Firewalls sit *between* subnets. You can block "Guests" from accessing "Finance".
+3.  **Organization:** Logical grouping (e.g., WiFi Users on `.10.x`, Servers on `.20.x`).
+4.  **Efficient IP Use:** Don't waste a Class A (16 million IPs) on a branch office of 50 people.
+
+**How to Subnet:** You "borrow" bits from the Host portion and give them to the Network portion.
+
+**Example: Creating 4 Subnets from a `/24`**
+*   **Original:** `192.168.10.0/24` (8 host bits = 254 hosts).
+*   **Action:** Borrow **2 bits** (2² = 4 subnets).
+*   **New Mask:** `/26` (24 + 2).
+*   **Result:** 4 Networks with 62 hosts each (instead of 1 network with 254 hosts).
+
+**Real World Logic:**
+*   **Traffic to same Subnet:** Switch (Direct).
+*   **Traffic to different Subnet:** Router (Gateway).
+
+### 1.5 Private vs Public IPs
 > **Localhost Loopback:** `127.0.0.1` -> "Me". Traffic never leaves the device.
 
 **Private IP Ranges (RFC 1918):**
@@ -98,43 +135,8 @@ These are free to use in your LAN. They are not routable on the public internet.
 | **Routing** | **Routable** on the Internet. | **Not Routable** (Dropped by Internet routers). |
 | **Example** | `8.8.8.8` (Google) | `192.168.1.5` (Your Laptop) |
 
-### 1.3 Subnet Masks: The most confusing part made simple
-The mask tells the device: "Which part is Network (Street) vs Host (House)?"
 
-**The Binary View (How it actually works):**
-Computers don't see `255.255.255.0`. They see 1s and 0s.
-*   **IP (`192.168.1.5`):** `11000000.10101000.00000001.00000101`
-*   **Mask (`/24`):** `11111111.11111111.11111111.00000000`
-*   **AND Operation:** `11000000.10101000.00000001` . `00000000` (Matches first 24 bits)
-*   **Result:** `192.168.1.0` (Network ID)
-
-#### 1.3.1 Subnetting: The Art of "Borrowing Bits"
-**Why do we Subnet? (The Benefits):**
-1.  **Reduce Broadcast Traffic:** If one PC yells (Broadcast), only its subnet hears it. Prevents the whole network from slowing down.
-2.  **Security:** Routers/Firewalls sit *between* subnets. You can block "Guests" from accessing "Finance".
-3.  **Organization:** Logical grouping (e.g., WiFi Users on `.10.x`, Servers on `.20.x`).
-4.  **Efficient IP Use:** Don't waste a Class A (16 million IPs) on a branch office of 50 people.
-
-**How to Subnet:** You "borrow" bits from the Host portion and give them to the Network portion.
-
-**Example: Creating 4 Subnets from a `/24`**
-*   **Original:** `192.168.10.0/24` (8 host bits = 254 hosts).
-*   **Action:** Borrow **2 bits** (2² = 4 subnets).
-*   **New Mask:** `/26` (24 + 2).
-*   **Result:** 4 Networks with 62 hosts each (instead of 1 network with 254 hosts).
-
-**Quick CIDR Reference Table:**
-| CIDR | Subnet Mask | Usable Hosts | Notes |
-| :--- | :--- | :--- | :--- |
-| **/24** | 255.255.255.0 | 254 | Standard Home/Office |
-| **/25** | 255.255.255.128 | 126 | Split in half |
-| **/30** | 255.255.255.252 | 2 | Point-to-Point Links (Router-to-Router) |
-
-**Real World Logic:**
-*   **Traffic to same Subnet:** Switch (Direct).
-*   **Traffic to different Subnet:** Router (Gateway).
-
-### 1.4 IPv6 Overview (The Future is Now)
+### 1.6 IPv6 Overview (The Future is Now)
 We ran out of IPv4 addresses. Hacky fixes like NAT kept us going, but IPv6 is the real solution.
 *   **Size:** 128-bit address (Huge).
 *   **Format:** Hexadecimal (e.g., `2001:0db8:85a3::8a2e:0370:7334`).
