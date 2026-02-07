@@ -91,6 +91,17 @@ Instead of saying "Class C" or typing out `255.255.255.0`, we use a slash follow
 
 This flexibility is why we can have a `/30` network with only 4 IPs (2 usable).
 
+> **Why only 2 usable? The "Bookends" Rule:**
+> In every IPv4 subnet, the **First IP** and **Last IP** are reserved and cannot be assigned to a device.
+> *   **First IP (Network ID):** This is the name of the network itself (e.g., `192.168.1.0`). It's like the street sign.
+> *   **Last IP (Broadcast Address):** This is for yelling to everyone on the network (e.g., `192.168.1.255`).
+>
+> *Example `/30` (4 IPs Total):*
+> *   `.0` -> Network ID (**Unusable**)
+> *   `.1` -> Host A (Usable)
+> *   `.2` -> Host B (Usable)
+> *   `.3` -> Broadcast (**Unusable**)
+
 **Quick CIDR Reference Table:**
 | CIDR | Subnet Mask | Usable Hosts | Notes |
 | :--- | :--- | :--- | :--- |
